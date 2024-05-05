@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C3RTiFY</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        
+        .navbar h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .navbar .login,.navbar .signup{
+            font-size: 18px;
+            text-decoration: none;
+            color: #fff;
+          justify-content: none;
+        }
+       
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        
+        .input-container {
+            text-align: center;
+        }
+        
+        .input-container input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 2%;
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>C3RTiFY</h1>
+    <a href="login/login.html" class="login">Login</a>
+    <a href="signup/signup.html" class="signup">Signup</a>
+</div>
+
+<div class="container">
+   <div class="inpinfo">
+        <h3 class="info">Enter the link of certificate to verify</h3>
+    </div>
+    <div class="input-container">
+        <input type="text" placeholder="Enter your text here">
+    </div>
+</div>
+
+<footer>
+    &copy; 2024 C3RTiFY. All rights reserved.
+</footer>
+
+</body>
+</html>
