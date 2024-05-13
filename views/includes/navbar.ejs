@@ -2,15 +2,17 @@
     <h1>C3RTiFY</h1>
 </div>
 <div class="navbar-usd">
-  
-    
-
- 
-    
-      <a href="/signup">Sign-Up</a>&nbsp;
-      <a href="/login">Log-In</a>&nbsp;
-     
-      
-          
-          
-  </div>
+    <% if (user) { %>
+        <!-- Display content for authenticated user -->
+        <% if (user.displayName) { %>
+            <p>Welcome, <%= user.displayName %>!</p>
+        <% } else { %>
+            <p>Welcome, User!</p>
+        <% } %>
+        <a href="/logout">Logout</a>
+    <% } else { %>
+        <!-- Display content for non-authenticated user --> 
+        <a href="/signup">Sign-Up</a>&nbsp;
+        <a href="/login">Log-In</a>&nbsp;
+    <% } %>         
+</div>
