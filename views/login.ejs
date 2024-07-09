@@ -1,4 +1,4 @@
-<% layout("layout/boilerplate.ejs")%>
+<% layout("layout/boilerplate.ejs",{ user: user })%>
     <form class="box" action="/login" method="post">
         <h1>Login</h1>
         <input type="text" name="email" id="email" placeholder="email">

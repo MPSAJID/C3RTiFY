@@ -1,7 +1,13 @@
-<% layout("layout/boilerplate")%>
-   <div class="container" id="signup-container">
-       <form action="/signup" method="post"> <h2>Sign Up</h2>
-        <div id="signup-error" class="error"></div>
+<% layout("layout/boilerplate",{ user: user })%>
+
+<div class="container" id="signup-container">
+       <form action="/signup" method="post">
+        <h2>Sign Up</h2>
+        <div id="signup-error" class="error">
+        <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+        </div>
         <input type="email" id="signup-email" name="email" placeholder="Email">
         <input type="password" id="signup-password" name="password" placeholder="Password">
         <input type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password">

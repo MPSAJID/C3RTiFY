@@ -7,7 +7,7 @@ require("firebase/auth");
 require("firebase/database");
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged} = require("firebase/auth");
+const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
 
 require('dotenv').config();
@@ -33,6 +33,7 @@ app.use(session({
 }));
 
 const engine = require('ejs-mate');
+const { log } = require('console');
 app.engine("ejs", engine);
 
 const firebaseConfig = {
@@ -49,12 +50,22 @@ const firebaseConfig = {
 const fbapp = firebase.initializeApp(firebaseConfig);
 const auth = getAuth(fbapp);
 
-app.use((req, res, next) => {
-    onAuthStateChanged(auth, (user) => {
-        var uid = user.uid;
-        req.session.user = user; // Store user in session
-        next(); // Pass control to the next middleware or route handler
+const getUserState = (auth) => {
+    return new Promise((resolve) => {
+        onAuthStateChanged(auth, (user) => {
+            resolve(user);
+        });
     });
+};
+
+app.use(async (req, res, next) => {
+    try {
+        const user = await getUserState(auth);
+        req.session.user = user ? { uid: user.uid, email: user.email } : null;
+    } catch (error) {
+        console.error('Error getting auth state:', error);
+    }
+    next();
 });
 
 app.get('/', (req, res) => {
@@ -63,8 +74,8 @@ app.get('/', (req, res) => {
 
 
 
-app.get('/login', async (req, res) => {
-    res.render('login.ejs');
+app.get('/login',(req, res) => {
+    res.render('login.ejs',{ user: req.session.user});
 })
 
 app.post('/login', async (req, res) => {
@@ -72,37 +83,72 @@ app.post('/login', async (req, res) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log("logged in as : ", user);
-        req.session.user = user;
+        console.log("logged in as : ", user.email);
+        req.session.user = { uid: user.uid, email: user.email };
         res.redirect('/');
     } catch (error) {
         const errorMessage = error.message;
         console.error('login error:', errorMessage);
-        res.render('login.ejs', { error: errorMessage });
+        res.render('login.ejs', { error: errorMessage , user: req.session.user });
     }
 })
 
 app.get('/signup',(req,res)=>{
-    res.render('signup.ejs');
+  
+    const error = req.query.error || null;
+    res.render('signup.ejs',{ user: req.session.user,error});
+   
 })
 
 app.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password,confirmpassword } = req.body;
+    if (password !== confirmpassword) {
+        return res.render('signup.ejs', { error: 'Passwords do not match', user: req.session.user });
+    }
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Signed up successfully
         const user = userCredential.user;
-        console.log('User created:', user);
-        req.session.user = user;
-        res.send('User created successfully');
+        console.log('User created:', user.email);
+        req.session.user = { uid: user.uid, email: user.email };
+        res.redirect('/');
     }
     catch(error){
         const errorCode = error.code;
         const errorMessage = error.message;
         console.error('Signup error:', errorCode, errorMessage);
-        res.status(500).send('Signup failed: ' + errorMessage);
+        return res.render('signup.ejs',{error:errorMessage,user:req.session.user})
         }
 })
+
+
+app.post('/logout', async (req, res) => {
+    try {
+        await signOut(auth);
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destroy error:', err);
+                return res.redirect('/');
+            }
+            res.clearCookie('connect.sid');
+            return res.redirect('/');
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return res.redirect('/');
+    }
+});
+
+
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    if (!res.headersSent) {
+        res.status(500).send('Something broke!');
+    } else {
+        next(err);
+    }
+});
+
+
 
 app.listen(3000, () => {
     console.log("server running on 3000");

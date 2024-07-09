@@ -4,14 +4,15 @@
 <div class="navbar-usd">
     <% if (user) { %>
         <!-- Display content for authenticated user -->
-        <% if (user.displayName) { %>
-            <p>Welcome, <%= user.displayName %>!</p>
-        <% } else { %>
-            <p>Welcome, User!</p>
+        <% if (user.email) { %>
+            <p>Welcome, <%= user.email %>!</p>
         <% } %>
-        <a href="/logout">Logout</a>
+        <form action="/logout" method="POST" style="display: inline;">
+            <button type="submit">Logout</button>
+        </form>
     <% } else { %>
         <!-- Display content for non-authenticated user --> 
+        <p>Please login/signup</p>
         <a href="/signup">Sign-Up</a>&nbsp;
         <a href="/login">Log-In</a>&nbsp;
     <% } %>         
