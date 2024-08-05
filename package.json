@@ -27,7 +27,13 @@
   "firebase": "^10.11.1",
   
     
-  "method-override": "^3.0.0"
+  "method-override": "^3.0.0",
+  
+    
+  "pdf-lib": "^1.17.1",
+  
+    
+  "pdfjs-dist": "^4.4.168"
   
   }
 }

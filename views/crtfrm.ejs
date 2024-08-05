@@ -1,0 +1,37 @@
+<% layout("layout/boilerplate",{ user: user })%>
+
+<h1>issue new certificate</h1>
+<form action="/issuenew" method="post">
+    <label required="true" for="name">Enter recipient name:</label><input required="true" type="text" placeholder="name" id="name"><br>
+    <label for="USN">Enter recipient USN: </label><input required="true" type="text" placeholder="USN" id="USN"><br>
+    <label for="branch">select recipient branch:</label><select required="true" name="branch"  id="branch">
+        <option value="branch">branch</option>
+        <% const branches = [ "CSE","ISE","AIML","ECE","EEE","MECH","CIVIL","ARCH"]; %>
+        <% branches.forEach(branch=>{  %>
+            <option value="<%=branch%>"><%=branch%></option>
+        <% }) %>
+    </select><br>
+    <label for="sem">select recipient sem:</label><select required="true" name="sem" id="sem">
+        <option value="sem">sem</option>
+        <% for( let i = 1; i <= 10; i++ ) { %>
+            <option value="<%=i%>"><%= i %></option>
+        <% } %> 
+    </select><br>
+    <select name="lvl" id="lvl">
+        <option value="level1">level1</option>
+        <option value="level2">level2</option>
+        <option value="level3">level3</option>
+    </select><br>
+    <select name="cours" id="cours">
+        <option value="CL-CY">CL-CY</option>
+        <option value="AI-ML">AI-ML</option>
+        <option value="IOT">IOT</option>
+        <option value="D&P">D&P</option>
+        <option value="EV-RE">EV-RE</option>
+        <option value="VFX">VFX</option>
+        <option value="AIR">AIR</option>
+    </select><br>
+
+    <label for="dateofcmp">date of completion</label><input required="true" type="date" id="dateofcmp"><br>
+    <button type="submit">issue certificate</button>
+</form>

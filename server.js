@@ -9,7 +9,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
-
+const { generateCertificate } = require('./createpdf.js'); 
 require('dotenv').config();
 
 const crypto = require('crypto');
@@ -31,6 +31,8 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+app.use(express.urlencoded({ extended: true }));
 
 const engine = require('ejs-mate');
 const { log } = require('console');
@@ -138,6 +140,35 @@ app.post('/logout', async (req, res) => {
     }
 });
 
+const instauth = (req, res, next) => {
+    const instemail = process.env.instemail;
+    const user = req.session.user;
+
+    if (user && user.email === instemail) {
+        next();
+    } else {
+        res.status(403).send('access restricted ');
+    }
+};
+
+app.get('/issuenew',instauth,(req,res)=>{
+    res.render('crtfrm.ejs',{user:req.session.user})
+});
+
+app.post('/issuenew',instauth,async(req,res)=>{
+    const { name, USN, branch, sem,lvl,cours,dateofcmp } = req.body;
+    const courseName = `${lvl} - ${cours}`;  
+    const dateofcomp = dateofcmp;
+    const clgname = 'UNIVERSITY OF VISVESVARAYA COLLEGE OF ENGINEERING';
+    const instituteLogoPath = 'public/marvel.png';
+    try {
+        await generateCertificate(`certificate-${name}.pdf`, USN, sem,branch, name, courseName, dateofcomp, clgname, instituteLogoPath);
+        res.send('Certificate generated successfully!');
+    } catch (error) {
+        console.error('Certificate generation error:', error);
+        res.status(500).send('Error generating certificate');
+    }
+})
 
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -147,8 +178,6 @@ app.use((err, req, res, next) => {
         next(err);
     }
 });
-
-
 
 app.listen(3000, () => {
     console.log("server running on 3000");
