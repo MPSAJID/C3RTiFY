@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C3RTiFY</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
-    <link rel="stylesheet" href="/public/css/login.css">
-    <link rel="stylesheet" href="/public/css/style.css">
-    <link rel="stylesheet" href="/public/css/signup.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/signup.css">
 </head>
 <body>
     <%- include("../includes/navbar.ejs",{user:user})%>
-    <div class="container">
+    <div class="main-content">
+
+   <div class="container">
         <%-body -%>
     </div>
+ </div>
     <%- include("../includes/footer.ejs")%>
 
 </body>

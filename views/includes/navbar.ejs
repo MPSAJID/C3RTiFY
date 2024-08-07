@@ -1,22 +1,21 @@
 <div class="navbar" >
-    <h1><a href="/" style="text-decoration: none;">C3RTiFY</a></h1>
-    <h4><a href="/dashboard" style="text-decoration: none;">Dashboard</a></h4>
+    <h1 class="nav-left"><a href="/" style="text-decoration: none;" class="logo">C3RTiFY</a></h1>
+    <div class="nav-right">
     <% if (user) { %>
-        <!-- Display content for authenticated user -->
         <% if (user.email) { %>
             <p>Welcome, <%= user.email %>!</p>
         <% } %>
-        <a href="/dashboard" style="text-decoration: none;">dashboard</a>
+        <h4><a href="/dashboard" class="nav-link" style="text-decoration: none;">dashboard</a></h4>
         <% if (user.email===process.env.instemail) { %>
-            <a href="/issuenew" style="text-decoration: none;">issuenew</a>
+            <a href="/issuenew" class="nav-link" style="text-decoration: none;">issuenew</a>
         <% } %>
         <form action="/logout" method="POST">
-            <button type="submit">Logout</button>
+            <button class="nav-link" type="submit">Logout</button>
         </form>
     <% } else { %>
-        <!-- Display content for non-authenticated user -->
-        <a href="/signup">Sign-Up</a>&nbsp;
-        <a href="/login">Log-In</a>&nbsp;
-    <% } %>         
+        <a class="nav-link" href="/signup">Sign-Up</a>&nbsp;
+        <a class="nav-link" href="/login">Log-In</a>&nbsp;
+    <% } %>
+</div>         
 </div>
 

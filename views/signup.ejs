@@ -1,27 +1,20 @@
-<% layout("layout/boilerplate",{ user: user })%>
+<% layout("layout/boilerplate",{ user: user,error:error })%>
 
-<div class="container" id="signup-container">
-       <form action="/signup" method="post">
-        <h2>Sign Up</h2>
-        <div id="signup-error" class="error">
-        <% if (error) { %>
-            <div class="alert alert-danger"><%= error %></div>
-        <% } %>
-        </div>
-        <input type="email" id="signup-email" name="email" placeholder="Email">
-        <input type="password" id="signup-password" name="password" placeholder="Password">
-        <input type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password">
-        <button type="submit" id="sgn-btn" >Sign Up</button>
+    <div class="container" id="signup-container">
+        <form action="/signup" method="post">
+            <h2>Sign Up</h2>
+            <div id="signup-error" class="error">
+                <% if (error) { %>
+                    <div class="alert alert-danger">
+                        <p>
+                            <%= error %>
+                        </p>
+                    </div>
+                    <% } %>
+            </div>
+            <input type="email" id="signup-email" name="email" placeholder="Email">
+            <input type="password" id="signup-password" name="password" placeholder="Password">
+            <input type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password">
+            <button type="submit" id="sgn-btn">Sign Up</button>
         </form>
     </div>
-
-    <!-- <div class="container" id="login-container">
-        <h2>Login</h2>
-        <div id="login-error" class="error"></div>
-        <input type="text" id="login-username" placeholder="Username or Email">
-        <input type="password" id="login-password" placeholder="Password">
-        <button >Login</button>
-    </div> -->
-
-    
-
