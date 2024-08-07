@@ -1,9 +1,9 @@
 <% layout("layout/boilerplate",{ user: user })%>
 
-<h1>issue new certificate</h1>
-<form action="/issuenew" method="post">
-    <label required="true" for="name">Enter recipient name:</label><input required="true" type="text" placeholder="name" id="name"><br>
-    <label for="USN">Enter recipient USN: </label><input required="true" type="text" placeholder="USN" id="USN"><br>
+<form action="/issuenew" class="box" method="post">
+    <h1>issue new certificate</h1>
+    <label required="true" for="name">Enter recipient name:</label><input name="name" required="true" type="text" placeholder="name" id="name"><br>
+    <label for="USN">Enter recipient USN: </label><input name="USN" required="true" type="text" placeholder="USN" id="USN"><br>
     <label for="branch">select recipient branch:</label><select required="true" name="branch"  id="branch">
         <option value="branch">branch</option>
         <% const branches = [ "CSE","ISE","AIML","ECE","EEE","MECH","CIVIL","ARCH"]; %>
@@ -32,6 +32,6 @@
         <option value="AIR">AIR</option>
     </select><br>
 
-    <label for="dateofcmp">date of completion</label><input required="true" type="date" id="dateofcmp"><br>
+    <label for="dateofcmp">date of completion</label><input name="dateofcmp" required="true" type="date" id="dateofcmp"><br>
     <button type="submit">issue certificate</button>
 </form>

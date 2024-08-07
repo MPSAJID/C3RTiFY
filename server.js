@@ -21,11 +21,10 @@ const secretKey = crypto.randomBytes(32).toString('hex');
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
+app.use(express.static(path.join(__dirname, "/public")));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "/public")))
 app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(session({
     secret: secretKey,
     resave: false,
@@ -35,7 +34,6 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 
 const engine = require('ejs-mate');
-const { log } = require('console');
 app.engine("ejs", engine);
 
 const firebaseConfig = {
@@ -147,9 +145,13 @@ const instauth = (req, res, next) => {
     if (user && user.email === instemail) {
         next();
     } else {
-        res.status(403).send('access restricted ');
+        res.status(403).send('access restricted!(login as institute to proceed)');
     }
 };
+
+app.get('/dashboard',async (req,res)=>{
+    res.render('dashboard.ejs',{user:req.session.user});
+});
 
 app.get('/issuenew',instauth,(req,res)=>{
     res.render('crtfrm.ejs',{user:req.session.user})
@@ -159,10 +161,10 @@ app.post('/issuenew',instauth,async(req,res)=>{
     const { name, USN, branch, sem,lvl,cours,dateofcmp } = req.body;
     const courseName = `${lvl} - ${cours}`;  
     const dateofcomp = dateofcmp;
-    const clgname = 'UNIVERSITY OF VISVESVARAYA COLLEGE OF ENGINEERING';
     const instituteLogoPath = 'public/marvel.png';
+    const certPath = path.join(__dirname, 'certs', `certificate-${name}.pdf`);
     try {
-        await generateCertificate(`certificate-${name}.pdf`, USN, sem,branch, name, courseName, dateofcomp, clgname, instituteLogoPath);
+        await generateCertificate(certPath, USN, sem,branch, name, courseName, dateofcomp, instituteLogoPath);
         res.send('Certificate generated successfully!');
     } catch (error) {
         console.error('Certificate generation error:', error);

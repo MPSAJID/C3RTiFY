@@ -2,78 +2,96 @@
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const fs = require('fs');
 
-async function generateCertificate(outputPath, USN, sem,branch, candidateName, courseName, dateofcomp, clgname, instituteLogoPath) {
+async function generateCertificate(outputPath, USN, sem,branch, candidateName, courseName, dateofcomp, instituteLogoPath) {
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage();
+    const page = pdfDoc.addPage([841.89, 595.28]);
 
     const { width, height } = page.getSize();
-    const fontSize = 16;
+    console.log(width);
  
     
     const timesRomanFont=await pdfDoc.embedFont(StandardFonts.TimesRoman);
-    
-    page.drawText('UNIVERSITY OF VISVESVARAYA \nCOLLEGE OF ENGINEERING', {
-        x: 50,
-        y: height - 4 * fontSize,
-        size: 22,
-        font: timesRomanFont,
-        
-    })
+    const TimesRomanBold=await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    const HelveticaBold=await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+    const borderWidth = 2; // Set border thickness
+        const borderColor = rgb(0, 0, 0); // Set border color
+        page.drawRectangle({
+            x: borderWidth / 2,
+            y: borderWidth / 2,
+            width: width - borderWidth,
+            height: height - borderWidth,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
+        });
+    
+    page.drawText('UNIVERSITY OF VISVESVARAYA COLLEGE OF ENGINEERING', {
+        x: 20,
+        y: height - 80,
+        size: 28,
+        font: HelveticaBold,
+        lineHeight: 33,
+        
+    });
+    
+    page.drawText('M A R V E L  R & D  L A B', {
+        x: 200,
+        y: height - 140,
+        size: 27,
+        font: timesRomanFont,
+        color: rgb(0,0,0),
+    });
     // Add institute logo
     if (instituteLogoPath) {
         const logoBytes = fs.readFileSync(instituteLogoPath);
         const logoImage = await pdfDoc.embedPng(logoBytes);
         const logoDims = logoImage.scale(0.2);
         page.drawImage(logoImage, {
-            x: 50,
-            y: height - 150,
+            x:300,
+            y: height - 180,
+            size : 125,
             width: logoDims.width,
             height: logoDims.height,
         });
     }
-    // Add institute name
-    const instituteFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    page.drawText(clgname, {
-        x: 50,
-        y: height - 200,
-        size: 15,
-        font: instituteFont,
-        color: rgb(0, 0, 0),
-    });
 
     // Add title
     page.drawText('Certificate of Completion', {
-        x: 50,
-        y: height - 250,
-        size: 25,
-        font: instituteFont,
+        x: 150,
+        y: height - 220,
+        size: 28,
+        font: TimesRomanBold,
         color: rgb(0, 0, 0),
     });
     
-    page.drawText('MARVEL R & D LAB', {
-        x: 50,
-        y: height - 270,
-        size: 23,
-        font: instituteFont,
-        color: rgb(0, 0, 0),
-    });
 
     // Add recipient name, USN, and course name
-    const recipientText = `Hereby certifies that\n${candidateName}\nwith USN ${USN}\n from ${sem} sem ${branch}\n
-                    has fulfilled all the prescribed requirements for the completion of the \n${courseName}\n course as on ${dateofcomp}`;
-    const recipientLines = recipientText.split('\n');
-    const textY = height - 300;
-    recipientLines.forEach((line, idx) => {
-        page.drawText(line, {
-            x: 50,
-            y: textY - (fontSize + 5) * idx,
-            size: fontSize,
-            font: instituteFont,
-            
-        });
+    const recipientText = `
+    \tHereby certifies that ${candidateName} with USN ${USN} from ${sem} sem 
+    ${branch} has fulfilled all the prescribed requirements for the
+    completion of the ${courseName} course as on ${dateofcomp}.
+    `;
+    page.drawText(recipientText.trim(), {
+        x: 50,
+        y: height - 280,
+        size: 28,
+        font: timesRomanFont,
+        lineHeight: 30, // Adjust this value as needed for spacing
     });
+
+   
+    page.drawText('uvcega president',{
+        x:30,
+        y: height-500,
+        size: 25,
+    });
+    page.drawText('faculty advisor',{
+        x:4800,
+        y: height-500,
+        size: 25,
+    });
+   
 
     // Save the PDF document
     const pdfBytes = await pdfDoc.save();
@@ -98,17 +116,15 @@ async function extractCertificate(pdfPath) {
     }
 
     const lines = text.split('\n');
-    const clgname = lines[0];
     const candidateName = lines[2];
     const USN = lines[4];
     const courseName = lines[6];
 
-    return { USN, candidateName, courseName, clgname };
+    return { USN, candidateName, courseName};
 }
 
-// Example usage:
-// generateCertificate('certificate.pdf', '12345', 'John Doe', 'JavaScript Programming', 'OpenAI', 'path/to/logo.png');
-// extractCertificate('certificate.pdf').then(console.log);
 
-    // generateCertificate('certificate1.pdf', '12345','4thsem CSE', 'sajid', 'clcy-2','sept23', 'uvce', 'G:/proj/C3RTiFY/public/marvel.png');
+
+    // generateCertificate('certificate1.pdf', '12345','4thsem ','CSE', 'sajid', 'clcy-2','sept23', , 'G:/proj/C3RTiFY/public/marvel.png');
     module.exports={generateCertificate}
+   
