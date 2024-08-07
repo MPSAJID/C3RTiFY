@@ -8,21 +8,48 @@ body {
     background-color: #333;
     color: #fff;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; 
     align-items: center;
     padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 500;
 }
 
-.navbar h1 {
-    margin: 0;
-    font-size: 24px;
+.nav-left {
+    display: flex;
+    align-items: center;
 }
 
-.navbar .login,.navbar .signup{
-    font-size: 18px;
+.nav-right {
+    display: flex;
+    align-items: center;
+    margin-right: 3%;
+}
+
+.logo {
+    margin-right: 20px;
+    font-size: 25px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #0bb1f3;
+}
+
+.nav-link {
+    margin-left: 20px;
     text-decoration: none;
     color: #fff;
-  justify-content: none;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #74ebd5;
+}
+
+.navbar form {
+    margin: 0;
 }
 
 .container {
@@ -51,4 +78,33 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+.container-dash {
+    margin-top: 80px;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #333;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
 }
