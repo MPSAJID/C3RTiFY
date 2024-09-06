@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
 const { generateCertificate } = require('./createpdf.js'); 
+const { uploadToPinata, storeHashOnBlockchain } = require('./connection.js');
 require('dotenv').config();
 
 const crypto = require('crypto');
@@ -163,9 +164,21 @@ app.post('/issuenew',instauth,async(req,res)=>{
     const dateofcomp = dateofcmp;
     const instituteLogoPath = 'public/marvel.png';
     const certPath = path.join(__dirname, 'certs', `certificate-${name}.pdf`);
+    
+    function generateCertid(data) {
+        return crypto.createHash('sha256').update(data).digest('hex');
+    }
+    const certid = generateCertid(`${name}-${USN}`);
+    
     try {
         await generateCertificate(certPath, USN, sem,branch, name, courseName, dateofcomp, instituteLogoPath);
-        res.send('Certificate generated successfully!');
+        const ipfsHash = await uploadToPinata(certPath);
+        console.log(`ipfshash : ${ipfsHash}`);
+        
+        // Store IPFS hash on blockchain
+        await storeHashOnBlockchain(certid, ipfsHash);
+        res.send('Certificate generated and stored in blockchain successfully!');
+
     } catch (error) {
         console.error('Certificate generation error:', error);
         res.status(500).send('Error generating certificate');

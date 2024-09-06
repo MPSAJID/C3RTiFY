@@ -3,6 +3,9 @@
   "dependencies": {
   
     
+  "axios": "^1.7.4",
+  
+    
   "crypto": "^1.0.1",
   
     
@@ -27,13 +30,22 @@
   "firebase": "^10.11.1",
   
     
+  "form-data": "^4.0.0",
+  
+    
   "method-override": "^3.0.0",
   
     
   "pdf-lib": "^1.17.1",
   
     
-  "pdfjs-dist": "^4.4.168"
+  "pdfjs-dist": "^4.4.168",
+  
+    
+  "truffle": "^5.11.5",
+  
+    
+  "web3": "^4.11.1"
   
   }
 }
