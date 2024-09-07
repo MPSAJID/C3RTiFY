@@ -2,14 +2,19 @@
 
 
 <div>
-    <div>
-        <h3>verify certificate</h3>
-    </div>
-    <div>
-        <input placeholder="enter certificate id" type="" name="cert-id" id="cert-id">
-        <p>or upload to verify</p>
-        <input type="file" name="" id="cert-pdf"><br>
-        <button type="submit">verify</button>
-
-    </div>
+    <% if (message) { %>
+        <div class="alert alert-success">
+            <strong>Success!</strong> <%= message %>
+        </div>
+    <% } %>
+   
+    
 </div>
+<script>
+    setTimeout(function() {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.style.display = 'none';
+        }
+    }, 5000); 
+</script>

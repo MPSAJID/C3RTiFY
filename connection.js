@@ -82,7 +82,21 @@ if (contractAddress && contractABI.length > 0) {
         }
     }
 
-    module.exports = { uploadToPinata, storeHashOnBlockchain };
+    async function verifyCertificateOnBlockchain(certId) {
+        if (!contract) {
+            throw new Error('Contract is not properly initialized.');
+        }
+    
+        try {
+            const certData = await contract.methods.isVerified(certId).call();
+            return certData;  // Check if the certificate exists
+        } catch (error) {
+            console.error('Error verifying certificate on blockchain:', error);
+            throw error;
+        }
+    }
+
+    module.exports = { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain };
 } else {
     console.error('Contract ABI or address is missing.');
 }

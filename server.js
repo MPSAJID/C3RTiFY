@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
 const { generateCertificate } = require('./createpdf.js'); 
-const { uploadToPinata, storeHashOnBlockchain } = require('./connection.js');
+const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain } = require('./connection.js');
 require('dotenv').config();
 
 const crypto = require('crypto');
@@ -70,7 +70,9 @@ app.use(async (req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.render('index.ejs',{ user: req.session.user });
+    const message = req.session.message || null;  // Get the message from the session
+    req.session.message = null; 
+    res.render('index.ejs', { user: req.session.user, message });
 })
 
 
@@ -173,17 +175,38 @@ app.post('/issuenew',instauth,async(req,res)=>{
     try {
         await generateCertificate(certPath, USN, sem,branch, name, courseName, dateofcomp, instituteLogoPath);
         const ipfsHash = await uploadToPinata(certPath);
-        console.log(`ipfshash : ${ipfsHash}`);
+        console.log(`ipfshash : ${ipfsHash}\n certd : ${certid} `);
         
         // Store IPFS hash on blockchain
         await storeHashOnBlockchain(certid, ipfsHash);
-        res.send('Certificate generated and stored in blockchain successfully!');
+        req.session.message = 'Certificate issued and stored on blockchain successfully!';
+        res.redirect('/');
 
     } catch (error) {
         console.error('Certificate generation error:', error);
         res.status(500).send('Error generating certificate');
     }
-})
+});
+
+app.get('/verify', (req, res) => {
+    res.render('index.ejs', { user: req.session.user, result: null, error: null });
+});
+
+app.post('/verify', async (req, res) => {
+    const { certId } = req.body;
+    try {
+        const certExists = await verifyCertificateOnBlockchain(certId); // Call the function to verify on blockchain
+        if (certExists) {
+            res.render('verify.ejs', { user: req.session.user, result: 'Certificate is valid!', error: null });
+        } else {
+            res.render('verify.ejs', { user: req.session.user, result: null, error: 'Certificate not found!' });
+        }
+    } catch (error) {
+        console.error('Verification error:', error);
+        res.render('index.ejs', { user: req.session.user, result: null, error: 'Error verifying certificate' });
+    }
+});
+
 
 app.use((err, req, res, next) => {
     console.error('Error:', err);

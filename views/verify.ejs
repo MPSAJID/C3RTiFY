@@ -1,0 +1,30 @@
+<% layout('layout/boilerplate.ejs',{ user: user,result:error,error:error}) %>
+
+
+<div class="container">
+    <h1>Verify Certificate</h1>
+
+    <% if (result) { %>
+        <div class="alert alert-success">
+            <strong>Success!</strong> <%= result %>
+        </div>
+    <% } else if (error) { %>
+        <div class="alert alert-danger">
+            <strong>Error!</strong> <%= error %>
+        </div>
+    <% } %>
+
+    <form action="/verify" method="POST">
+        <label for="certId">Enter Certificate ID:</label>
+        <input type="text" name="certId" required>
+        <button type="submit">Verify</button>
+    </form> 
+</div>
+<script>
+setTimeout(function() {
+    const alert = document.querySelector('.alert');
+    if (alert) {
+        alert.style.display = 'none';
+    }
+}, 5000);
+</script>
