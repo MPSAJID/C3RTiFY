@@ -1,20 +1,4 @@
-<% layout('layout/boilerplate.ejs',{ user: user }) %>
+<% layout('layout/boilerplate.ejs',{ user: user, }) %>
 
 
-<div>
-    <% if (message) { %>
-        <div class="alert alert-success">
-            <strong>Success!</strong> <%= message %>
-        </div>
-    <% } %>
-   
-    
-</div>
-<script>
-    setTimeout(function() {
-        const alert = document.querySelector('.alert');
-        if (alert) {
-            alert.style.display = 'none';
-        }
-    }, 5000); 
-</script>
+

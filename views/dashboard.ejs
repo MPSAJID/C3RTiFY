@@ -1,0 +1,53 @@
+<% layout("layout/boilerplate.ejs",{ user: user, certificates:certificates})%>
+<div class="container-dash">
+    <h1>Welcome to the Dashboard</h1>
+    <% if (user.email===process.env.instemail) { %>
+        <div>
+            <% if (message) { %>
+                <div class="alert alert-success">
+                    <strong>Success!</strong> <%= message %>
+                </div>
+            <% } %>
+           
+            
+        </div>
+    <% if (certificates.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>USN</th>
+                    <th>Branch</th>
+                    <th>Semester</th>
+                    <th>Course Name</th>
+                    <th>Date of Completion</th>
+                    <th>Certificate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% certificates.forEach(certificate => { %>
+                    <tr>
+                        <td><%= certificate.name %></td>
+                        <td><%= certificate.USN %></td>
+                        <td><%= certificate.branch %></td>
+                        <td><%= certificate.sem %></td>
+                        <td><%= certificate.courseName %></td>
+                        <td><%= certificate.dateofcomp %></td>
+                        <td><a href="/certs/<%= certificate.certificatePath %>" target="_blank">View Certificate</a></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No certificates issued yet!</p>
+    <% } %>
+    <% } %>
+</div>
+<script>
+    setTimeout(function() {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.style.display = 'none';
+        }
+    }, 5000); 
+</script>

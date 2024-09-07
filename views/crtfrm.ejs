@@ -1,27 +1,39 @@
-<% layout("layout/boilerplate",{ user: user })%>
+<% layout("layout/boilerplate",{ user: user }) %>
 
-<form action="/issuenew" class="box" method="post">
-    <h1>issue new certificate</h1>
-    <label required="true" for="name">Enter recipient name:</label><input name="name" required="true" type="text" placeholder="name" id="name"><br>
-    <label for="USN">Enter recipient USN: </label><input name="USN" required="true" type="text" placeholder="USN" id="USN"><br>
-    <label for="branch">select recipient branch:</label><select required="true" name="branch"  id="branch">
-        <option value="branch">branch</option>
+<form id="issueForm" action="/issuenew" class="box" method="post">
+    <h1>Issue New Certificate</h1>
+    
+    <label for="name">Enter recipient name:</label>
+    <input name="name" required="true" type="text" placeholder="name" id="name"><br>
+    
+    <label for="USN">Enter recipient USN:</label>
+    <input name="USN" required="true" type="text" placeholder="USN" id="USN"><br>
+    
+    <label for="branch">Select recipient branch:</label>
+    <select required="true" name="branch" id="branch">
+        <option value="">branch</option>
         <% const branches = [ "CSE","ISE","AIML","ECE","EEE","MECH","CIVIL","ARCH"]; %>
-        <% branches.forEach(branch=>{  %>
-            <option value="<%=branch%>"><%=branch%></option>
+        <% branches.forEach(branch => { %>
+            <option value="<%= branch %>"><%= branch %></option>
         <% }) %>
     </select><br>
-    <label for="sem">select recipient sem:</label><select required="true" name="sem" id="sem">
-        <option value="sem">sem</option>
-        <% for( let i = 1; i <= 10; i++ ) { %>
-            <option value="<%=i%>"><%= i %></option>
+    
+    <label for="sem">Select recipient semester:</label>
+    <select required="true" name="sem" id="sem">
+        <option value="">sem</option>
+        <% for(let i = 1; i <= 10; i++) { %>
+            <option value="<%= i %>"><%= i %></option>
         <% } %> 
     </select><br>
+
+    <label for="lvl">Select level:</label>
     <select name="lvl" id="lvl">
         <option value="level1">level1</option>
         <option value="level2">level2</option>
         <option value="level3">level3</option>
     </select><br>
+
+    <label for="cours">Select course:</label>
     <select name="cours" id="cours">
         <option value="CL-CY">CL-CY</option>
         <option value="AI-ML">AI-ML</option>
@@ -32,6 +44,47 @@
         <option value="AIR">AIR</option>
     </select><br>
 
-    <label for="dateofcmp">date of completion</label><input name="dateofcmp" required="true" type="date" id="dateofcmp"><br>
-    <button type="submit">issue certificate</button>
+    <label for="dateofcmp">Date of completion:</label>
+    <input name="dateofcmp" required="true" type="date" id="dateofcmp"><br>
+
+    <!-- Open confirmation modal on button click -->
+    <button type="button" onclick="openConfirmationModal()">Issue Certificate</button>
 </form>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirm Submission</h2>
+        <p>certificates once issued cannot be edited!!</p>
+        <button type="button" onclick="submitForm()">Confirm</button>
+        <button type="button" onclick="closeConfirmationModal()">Cancel</button>
+    </div>
+</div>
+
+
+
+<!-- Script for handling the modal and form submission -->
+<script>
+    // Open the confirmation modal
+    function openConfirmationModal() {
+        document.getElementById('confirmationModal').style.display = 'flex';
+    }
+
+    // Close the confirmation modal
+    function closeConfirmationModal() {
+        document.getElementById('confirmationModal').style.display = 'none';
+    }
+
+    // Submit the form after confirmation
+    function submitForm() {
+        document.getElementById('issueForm').submit(); // Submit the form
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('confirmationModal');
+        if (event.target == modal) {
+            closeConfirmationModal();
+        }
+    }
+</script>

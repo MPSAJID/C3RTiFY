@@ -3,14 +3,15 @@ const app = express();
 const path = require('path');
 const methodOverride = require('method-override');
 const firebase = require("firebase/app");
+const admin = require('firebase-admin');
 require("firebase/auth");
 require("firebase/database");
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
-const { getFirestore } = require("firebase/firestore");
+const { getFirestore, doc, setDoc, collection, getDocs } = require("firebase/firestore");
 const { generateCertificate } = require('./createpdf.js'); 
-const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain } = require('./connection.js');
+const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getcertificates } = require('./connection.js');
 require('dotenv').config();
 
 const crypto = require('crypto');
@@ -24,6 +25,7 @@ app.set("views", path.join(__dirname, "/views"));
 
 app.use(express.static(path.join(__dirname, "/public")));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -32,7 +34,6 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(express.urlencoded({ extended: true }));
 
 const engine = require('ejs-mate');
 app.engine("ejs", engine);
@@ -49,15 +50,34 @@ const firebaseConfig = {
 
 
 const fbapp = firebase.initializeApp(firebaseConfig);
+// admin.initializeApp({
+//     credential: admin.credential.applicationDefault(),
+//   });
 const auth = getAuth(fbapp);
+const db = getFirestore(fbapp);
 
 const getUserState = (auth) => {
     return new Promise((resolve) => {
         onAuthStateChanged(auth, (user) => {
             resolve(user);
+            // const setCustomClaims = async (uid) => {
+            //     try {
+            //       const instemail = process.env.instemail;   
+            //       // Set custom claims
+            //       await admin.auth().setCustomUserClaims(uid, { instemail });
+            //       console.log('Custom claims set for user:', uid);
+            //     } catch (error) {
+            //       console.error('Error setting custom claims:', error);
+            //     }
+            //   };
+              
+              
+            //   const uid = user.uid; 
+            //   setCustomClaims(uid);
         });
     });
 };
+
 
 app.use(async (req, res, next) => {
     try {
@@ -152,9 +172,7 @@ const instauth = (req, res, next) => {
     }
 };
 
-app.get('/dashboard',async (req,res)=>{
-    res.render('dashboard.ejs',{user:req.session.user});
-});
+
 
 app.get('/issuenew',instauth,(req,res)=>{
     res.render('crtfrm.ejs',{user:req.session.user})
@@ -162,7 +180,7 @@ app.get('/issuenew',instauth,(req,res)=>{
 
 app.post('/issuenew',instauth,async(req,res)=>{
     const { name, USN, branch, sem,lvl,cours,dateofcmp } = req.body;
-    const courseName = `${lvl} - ${cours}`;  
+    const courseName = `${req.body.lvl} - ${req.body.cours}`;  
     const dateofcomp = dateofcmp;
     const instituteLogoPath = 'public/marvel.png';
     const certPath = path.join(__dirname, 'certs', `certificate-${name}.pdf`);
@@ -179,8 +197,33 @@ app.post('/issuenew',instauth,async(req,res)=>{
         
         // Store IPFS hash on blockchain
         await storeHashOnBlockchain(certid, ipfsHash);
+//         firebase.auth().currentUser.getIdTokenResult()
+//   .then((idTokenResult) => {
+//     // Fetch the instemail from .env or configuration
+//     const instemail = process.env.instemail;
+//     if (idTokenResult.claims.instemail === instemail) {
+//       console.log('User has the required custom claim.');
+//       // Allow access or show UI based on the custom claim
+//     } else {
+//       console.log('User does not have the required custom claim.');
+//       // Handle lack of access or redirect
+//     }
+//   })
+//   .catch((error) => {
+//     console.error('Error fetching ID token result:', error);
+//   });
+
+        await setDoc(doc(db, "certificates", certid), {
+            certId: certid,
+            name: name,
+            usn: USN,
+            sem: sem,
+            branch: branch,
+            course: courseName,
+            ipfshash: ipfsHash
+        });
         req.session.message = 'Certificate issued and stored on blockchain successfully!';
-        res.redirect('/');
+        res.redirect('/dashboard');
 
     } catch (error) {
         console.error('Certificate generation error:', error);
@@ -204,6 +247,34 @@ app.post('/verify', async (req, res) => {
     } catch (error) {
         console.error('Verification error:', error);
         res.render('index.ejs', { user: req.session.user, result: null, error: 'Error verifying certificate' });
+    }
+});
+
+app.get('/dashboard',async (req,res)=>{
+    if (!req.session.user || req.session.user.email !== process.env.instemail) {
+        return res.redirect('/login');
+    }
+    if(req.session.user.email == process.env.instemail){
+        try {
+            const querySnapshot = await getDocs(collection(db, "certificates"));
+            const certificates = [];
+
+            querySnapshot.forEach((doc) => {
+                certificates.push(doc.data());
+            });
+
+            const message = req.session.message || null;  
+            req.session.message = null; 
+
+            res.render('dashboard.ejs', {
+                user: req.session.user,
+                certificates: certificates,
+                message: message
+            });
+    } catch (error) {
+        console.error('Error fetching certificates:', error);
+        res.status(500).send('Error fetching certificates');
+    }
     }
 });
 

@@ -96,7 +96,17 @@ if (contractAddress && contractABI.length > 0) {
         }
     }
 
-    module.exports = { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain };
+    async function getCertificate(certid) {
+        try {
+            const certificate = await contract.methods.getCertificate(certid).call();
+            return certificate;
+        } catch (error) {
+            console.error('Error fetching certificate from blockchain:', error);
+            throw error;
+        }
+    }
+
+    module.exports = { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getCertificate };
 } else {
     console.error('Contract ABI or address is missing.');
 }
