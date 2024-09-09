@@ -1,10 +1,12 @@
 <% layout("layout/boilerplate.ejs",{ user: user, certificates:certificates})%>
+<!-- <div class="container"> -->
 <div class="container-dash">
-    <h1>Welcome to the Dashboard</h1>
+    <h1 style="text-align: center;">Welcome to the Dashboard</h1>
+    <h2 style="text-align: center;">Issued certificates</h2>
     <% if (user.email===process.env.instemail) { %>
         <div>
             <% if (message) { %>
-                <div class="alert alert-success">
+                <div class="alert alert-success" style="text-align: center;">
                     <strong>Success!</strong> <%= message %>
                 </div>
             <% } %>
@@ -12,29 +14,45 @@
             
         </div>
     <% if (certificates.length > 0) { %>
-        <table>
+        <table border="2px solid black">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>USN</th>
                     <th>Branch</th>
                     <th>Semester</th>
-                    <th>Course Name</th>
-                    <th>Date of Completion</th>
+                    <th>Course</th>
                     <th>Certificate</th>
+                    <th>status</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                <% certificates.forEach(certificate => { %>
+                <% certificates.forEach(certificate => { %>   
                     <tr>
                         <td><%= certificate.name %></td>
-                        <td><%= certificate.USN %></td>
+                        <td><%= certificate.usn %></td>
                         <td><%= certificate.branch %></td>
                         <td><%= certificate.sem %></td>
-                        <td><%= certificate.courseName %></td>
-                        <td><%= certificate.dateofcomp %></td>
-                        <td><a href="/certs/<%= certificate.certificatePath %>" target="_blank">View Certificate</a></td>
+                        <td><%= certificate.course %></td>
+                        <td><a href="https://gateway.pinata.cloud/ipfs/<%= certificate.ipfshash%>" target="_blank">View Certificate</a></td>
+                        <td>
+                            <% if (certificate.isRevoked) { %>
+                                <span style="color: red;" class="badge bg-danger">Revoked</span>
+                            <% } else { %>
+                                <span style="color: lime;" class="badge bg-success">Active</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (!certificate.isRevoked) { %>
+                                <button class="btn btn-danger" onclick="confirmRevoke('<%= certificate.certId %>')">Revoke</button>
+                            <% } else { %>
+                                <button class="btn btn-danger" style="cursor: disable; background-color: gray;" disabled>Revoked</button>
+                            <% } %>
+                        </td>
+                        <td><a href="/verify?certId=<%= certificate.certId %>">verify</a></td>
                     </tr>
+                    
                 <% }) %>
             </tbody>
         </table>
@@ -43,6 +61,7 @@
     <% } %>
     <% } %>
 </div>
+<!-- </div> -->
 <script>
     setTimeout(function() {
         const alert = document.querySelector('.alert');
@@ -50,4 +69,24 @@
             alert.style.display = 'none';
         }
     }, 5000); 
+
+    function confirmRevoke(certid) {
+        const confirmation = confirm("Are you sure you want to revoke this certificate?");
+        if (confirmation) {
+            fetch(`/revoke/${certid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard';  // Redirect to dashboard after successful revocation
+                } else {
+                    alert('Failed to revoke certificate');
+                }
+            }).catch(err => {
+                console.error('Error:', err);
+            });
+        }
+    }
 </script>

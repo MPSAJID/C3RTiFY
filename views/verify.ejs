@@ -1,4 +1,4 @@
-<% layout('layout/boilerplate.ejs',{ user: user,result:error,error:error}) %>
+<% layout('layout/boilerplate.ejs',{ user: user,certId:certId,result:result,error:error}) %>
 
 
 <div class="container">
@@ -16,7 +16,7 @@
 
     <form action="/verify" method="POST">
         <label for="certId">Enter Certificate ID:</label>
-        <input type="text" name="certId" required>
+        <input type="text" name="certId" value="<%= certId %>" placeholder="Enter certificate id" required>
         <button type="submit">Verify</button>
     </form> 
 </div>
