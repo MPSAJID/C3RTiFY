@@ -9,9 +9,11 @@ contract Certification {
         string branch;
         string course;
         string ipfshash;
+        bool isRevoked;
     }
     mapping (string => Certificate) public certificates;
     event certificateGenerated(string certid);
+    event CertificateRevoked(string certid);
 
     function generateCertificate(
         string memory _certid,
@@ -30,13 +32,23 @@ contract Certification {
         sem : _sem,
         branch : _branch,
         course : _course,
-        ipfshash : _ipfshash
+        ipfshash : _ipfshash,
+        isRevoked: false
 
       });
 
       certificates[_certid] = cert;
 
       emit certificateGenerated(_certid);
+    }
+
+    function revokeCertificate(string memory _certid) public {
+
+        require(bytes(certificates[_certid].ipfshash).length != 0, "Certificate does not exist");
+        require(!certificates[_certid].isRevoked, "Certificate has already been revoked");
+        certificates[_certid].isRevoked = true;
+        emit CertificateRevoked(_certid);
+        
     }
 
 
@@ -47,21 +59,23 @@ contract Certification {
             string memory _sem,
             string memory _course,
             string memory _branch,
-            string memory _ipfshash
+            string memory _ipfshash,
+            bool _isRevoked
         ) {
         Certificate memory cert = certificates[_certid];
         require(
             bytes(certificates[_certid].ipfshash).length != 0,
             "Certificate with this ID does not exist"
         );
-        return (cert.usn, cert.name, cert.sem, cert.branch, cert.course, cert.ipfshash);
+        require(!cert.isRevoked, "Certificate has been revoked");
+        return (cert.usn, cert.name, cert.sem, cert.branch, cert.course, cert.ipfshash, cert.isRevoked);
     }
 
 
     function isVerified(
         string memory _certid
     ) public view returns (bool) {
-        return bytes(certificates[_certid].ipfshash).length != 0;
+        return bytes(certificates[_certid].ipfshash).length != 0 && !certificates[_certid].isRevoked;
     }
 
 }

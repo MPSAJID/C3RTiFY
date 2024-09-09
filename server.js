@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
 const { getFirestore, doc, setDoc, collection, getDocs } = require("firebase/firestore");
 const { generateCertificate } = require('./createpdf.js'); 
-const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getcertificates } = require('./connection.js');
+const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getcertificates, revokeCertificate } = require('./connection.js');
 require('dotenv').config();
 
 const crypto = require('crypto');
@@ -36,6 +36,7 @@ app.use(session({
 
 
 const engine = require('ejs-mate');
+const { cert } = require('firebase-admin/app');
 app.engine("ejs", engine);
 
 const firebaseConfig = {
@@ -161,6 +162,25 @@ app.post('/logout', async (req, res) => {
     }
 });
 
+app.get('/verify', (req, res) => {
+    const certId = req.query.certId || '';
+    res.render('verify.ejs', { user: req.session.user, certId : certId, result: null, error: null });
+});
+
+app.post('/verify', async (req, res) => {
+    const { certId } = req.body;
+    try {
+        const certExists = await verifyCertificateOnBlockchain(certId); // Call the function to verify on blockchain
+        if (certExists) {
+            res.render('verify.ejs', { user: req.session.user,certId, result: 'Certificate is valid!', error: null });
+        } else {
+            res.render('verify.ejs', { user: req.session.user,certId, result: null, error: 'Certificate has been revoked or not found!' });        }
+    } catch (error) {
+        console.error('Verification error:', error);
+        res.render('verify.ejs', { user: req.session.user, certId,result: null, error: 'serverError verifying certificate' });
+    }
+});
+
 const instauth = (req, res, next) => {
     const instemail = process.env.instemail;
     const user = req.session.user;
@@ -183,7 +203,7 @@ app.post('/issuenew',instauth,async(req,res)=>{
     const courseName = `${req.body.lvl} - ${req.body.cours}`;  
     const dateofcomp = dateofcmp;
     const instituteLogoPath = 'public/marvel.png';
-    const certPath = path.join(__dirname, 'certs', `certificate-${name}.pdf`);
+    const certPath = path.join(__dirname, 'certs', `cert-${name}-${USN}.pdf`);
     
     function generateCertid(data) {
         return crypto.createHash('sha256').update(data).digest('hex');
@@ -231,24 +251,24 @@ app.post('/issuenew',instauth,async(req,res)=>{
     }
 });
 
-app.get('/verify', (req, res) => {
-    res.render('index.ejs', { user: req.session.user, result: null, error: null });
-});
-
-app.post('/verify', async (req, res) => {
-    const { certId } = req.body;
+app.post('/revoke/:certid',instauth, async (req, res) => {
+    
+    const certid = req.params.certid;
     try {
-        const certExists = await verifyCertificateOnBlockchain(certId); // Call the function to verify on blockchain
-        if (certExists) {
-            res.render('verify.ejs', { user: req.session.user, result: 'Certificate is valid!', error: null });
-        } else {
-            res.render('verify.ejs', { user: req.session.user, result: null, error: 'Certificate not found!' });
-        }
+         await revokeCertificate(certid);
+        const certRef = doc(db, "certificates", certid);
+        await setDoc(certRef, { isRevoked: true }, { merge: true });
+    
+        req.session.message = 'Certificate revoked successfully';
+        res.redirect('/dashboard');
     } catch (error) {
-        console.error('Verification error:', error);
-        res.render('index.ejs', { user: req.session.user, result: null, error: 'Error verifying certificate' });
+        console.error('Error revoking certificate:', error);
+        req.session.message = 'Error revoking certificate';
+        res.redirect('/dashboard');
     }
 });
+
+
 
 app.get('/dashboard',async (req,res)=>{
     if (!req.session.user || req.session.user.email !== process.env.instemail) {
@@ -277,6 +297,7 @@ app.get('/dashboard',async (req,res)=>{
     }
     }
 });
+
 
 
 app.use((err, req, res, next) => {

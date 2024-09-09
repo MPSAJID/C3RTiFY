@@ -82,6 +82,11 @@ if (contractAddress && contractABI.length > 0) {
         }
     }
 
+    async function revokeCertificate(certId) {
+        const accounts = await web3.eth.getAccounts();
+        await contract.methods.revokeCertificate(certId).send({ from: accounts[0] });
+    }
+
     async function verifyCertificateOnBlockchain(certId) {
         if (!contract) {
             throw new Error('Contract is not properly initialized.');
@@ -106,7 +111,7 @@ if (contractAddress && contractABI.length > 0) {
         }
     }
 
-    module.exports = { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getCertificate };
+    module.exports = { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getCertificate, revokeCertificate };
 } else {
     console.error('Contract ABI or address is missing.');
 }
