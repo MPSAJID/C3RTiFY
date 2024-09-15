@@ -1,0 +1,66 @@
+<% layout('layout/boilerplate', { user: user,student,certificates }) %>
+
+<div class="container">
+    <h1>Welcome, <%= student.name %></h1>
+    
+    <!-- Student Information Section -->
+    <div class="student-info">
+        <h2>Your Profile</h2>
+        <p><strong>Name:</strong> <%= student.name %></p>
+        <p><strong>USN:</strong> <%= student.usn %></p>
+        <p><strong>Semester:</strong> <%= student.sem %></p>
+        <p><strong>Branch:</strong> <%= student.branch %></p>
+        <p><strong>Email:</strong> <%= student.email %></p>
+    </div>
+
+    <!-- Certificates Section -->
+    <div class="certificates-section">
+        <h2>Your Certificates</h2>
+        <% if (certificates.length > 0) { %>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Certificate ID</th>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>IPFS Hash</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% certificates.forEach(function(cert) { %>
+                        <tr>
+                            <td><%= cert.certId %></td>
+                            <td><%= cert.course %></td>
+                            <td><%= cert.sem %></td>
+                            <td><%= cert.ipfshash %></td>
+                            <td>
+                                <a href="https://gateway.pinata.cloud/ipfs/<%= cert.ipfshash %>" target="_blank" class="btn btn-primary">View</a>
+                                <form action="/verify" method="post" style="display:inline;">
+                                    <input type="hidden" name="certId" value="<%= cert.certId %>">
+                                    <button type="submit" class="btn btn-secondary">Verify</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No certificates found.</p>
+        <% } %>
+    </div>
+
+</div>
+
+<style>
+    .container {
+        margin-top: 50px;
+    }
+    .student-info, .certificates-section {
+        margin-bottom: 30px;
+    }
+    table {
+        width: 100%;
+        margin-top: 20px;
+    }
+</style>

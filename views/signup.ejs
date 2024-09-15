@@ -1,20 +1,56 @@
-<% layout("layout/boilerplate",{ user: user,error:error })%>
+<% layout("layout/boilerplate", { user: user, error: error,role }) %>
 
-    <div class="container" id="signup-container">
-        <form action="/signup" method="post">
-            <h2>Sign Up</h2>
-            <div id="signup-error" class="error">
-                <% if (error) { %>
-                    <div class="alert alert-danger">
-                        <p>
-                            <%= error %>
-                        </p>
-                    </div>
-                    <% } %>
-            </div>
-            <input type="email" id="signup-email" name="email" placeholder="Email">
-            <input type="password" id="signup-password" name="password" placeholder="Password">
-            <input type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password">
-            <button type="submit" id="sgn-btn">Sign Up</button>
-        </form>
-    </div>
+<div class="container" id="signup-container">
+    <form action="/signup" method="post">
+        <h2>Sign Up</h2>
+
+        <div id="signup-error" class="error">
+            <% if (error) { %>
+                <div class="alert alert-danger">
+                    <p><%= error %></p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Role Selection: Radio Buttons -->
+        <label>Select Role</label>
+        <div>
+            <input type="radio" id="student" name="role" value="student" onclick="showStudentFields()" required>
+            <label for="student">Student</label>
+        </div>
+        <div>
+            <input type="radio" id="institute" name="role" value="institute"  onclick="hideStudentFields()" required>
+            <label for="institute">Institute</label>
+        </div>
+
+        <!-- Common Fields for Both Roles -->
+        <label for="name">Enter Full Name</label>
+        <input required type="text" id="name" name="name" placeholder="Full Name" >
+
+        <label for="signup-email">Enter Email</label>
+        <input required type="email" id="signup-email" name="email" placeholder="Email">
+ <!-- Student-Specific Fields (Initially Hidden) -->
+ <div id="studentFields" style="display: none;">
+    <label for="usn">Enter Student USN</label>
+    <input type="text" id="usn" name="usn" placeholder="Student USN">
+
+    <label for="sem">Enter Semester</label>
+    <input type="text" id="sem" name="sem" placeholder="Current Semester">
+
+    <label for="branch">Enter Branch</label>
+    <input type="text" id="branch" name="branch" placeholder="Student Branch">
+</div>
+        <input required type="password" id="signup-password" name="password" placeholder="Password">
+        <input required type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password">
+        <button type="submit" id="sgn-btn">Sign Up</button>
+    </form>
+</div>
+<script>
+    function showStudentFields() {
+        document.getElementById('studentFields').style.display = 'block'; // Show student fields
+    }
+
+    function hideStudentFields() {
+        document.getElementById('studentFields').style.display = 'none'; // Hide student fields
+    }
+</script>

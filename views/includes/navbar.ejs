@@ -2,13 +2,13 @@
     <h1 class="nav-left"><a href="/" style="text-decoration: none;" class="logo">C3RTiFY</a></h1>
     <div class="nav-right">
     <% if (user) { %>
-        <% if (user.email) { %>
-            <p>Welcome, <%= user.email %>!</p>
-        <% } %>
-        <h4><a href="/dashboard" class="nav-link" style="text-decoration: none;">dashboard</a></h4>
-        <% if (user.email===process.env.instemail) { %>
-            <a href="/issuenew" class="nav-link" style="text-decoration: none;">issuenew</a>
-        <% } %>
+            <p>Welcome, <%= user.name %>!</p>
+            <% if (user.role === 'student' ) { %>
+                <h4><a href="/student/dashboard/<%= user.uid %>" class="nav-link" style="text-decoration: none;">Student Dashboard</a></h4>
+            <% } else if (user.role === 'institute' || user.email===process.env.instemail) { %>
+                <h4><a href="/dashboard" class="nav-link" style="text-decoration: none;">dashboard</a></h4>
+                <a href="/issuenew" class="nav-link" style="text-decoration: none;">issuenew</a>
+            <% } %>
         <form action="/logout" method="POST">
             <button class="nav-link" type="submit">Logout</button>
         </form>
@@ -18,4 +18,3 @@
     <% } %>
 </div>         
 </div>
-

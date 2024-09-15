@@ -1,7 +1,15 @@
-body {
-    font-family: Arial, sans-serif;
+html, body {
+    height: 100%; /* Ensure the body takes the full height of the viewport */
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 60px; 
+    overflow-x: hidden;
 }
 
 .alert {
@@ -31,6 +39,7 @@ body {
     left: 0;
     width: 100%;
     z-index: 500;
+    height: 40px;
 }
 
 .nav-left {
@@ -71,7 +80,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    margin-top: 45px;
+    
 }
 
 .input-container {
@@ -97,8 +107,10 @@ footer {
     z-index: 1000;
 }
 .container-dash {
-    margin-top: 80px;
+    flex: 1; /* Allow the container to take up remaining space */
     padding: 20px;
+    overflow-y: auto; /* Enable scrolling in case content overflows */
+    margin-top: 80px; /* Ensure the navbar doesn't cover the top */
 }
 
 table {

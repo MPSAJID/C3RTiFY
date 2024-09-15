@@ -9,7 +9,7 @@ require("firebase/database");
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const { getAuth , createUserWithEmailAndPassword , signInWithEmailAndPassword , onAuthStateChanged, signOut} = require("firebase/auth");
-const { getFirestore, doc, setDoc, collection, getDocs } = require("firebase/firestore");
+const { getFirestore, doc, setDoc, collection, getDocs,getDoc } = require("firebase/firestore");
 const { generateCertificate } = require('./createpdf.js'); 
 const { uploadToPinata, storeHashOnBlockchain, verifyCertificateOnBlockchain, getcertificates, revokeCertificate } = require('./connection.js');
 require('dotenv').config();
@@ -57,24 +57,48 @@ const fbapp = firebase.initializeApp(firebaseConfig);
 const auth = getAuth(fbapp);
 const db = getFirestore(fbapp);
 
-const getUserState = (auth) => {
+const getUserState = async (auth) => {
     return new Promise((resolve) => {
-        onAuthStateChanged(auth, (user) => {
-            resolve(user);
-            // const setCustomClaims = async (uid) => {
-            //     try {
-            //       const instemail = process.env.instemail;   
-            //       // Set custom claims
-            //       await admin.auth().setCustomUserClaims(uid, { instemail });
-            //       console.log('Custom claims set for user:', uid);
-            //     } catch (error) {
-            //       console.error('Error setting custom claims:', error);
-            //     }
-            //   };
-              
-              
-            //   const uid = user.uid; 
-            //   setCustomClaims(uid);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Define references for both students and institutes
+                    const studentDocRef = doc(db, 'students', user.uid);
+                    const instituteDocRef = doc(db, 'institutes', user.uid);
+
+                    // Fetch documents
+                    const [studentDoc, instituteDoc] = await Promise.all([
+                        getDoc(studentDocRef),
+                        getDoc(instituteDocRef)
+                    ]);
+
+                    let userData = null;
+
+                    // Check which document exists and set userData
+                    if (studentDoc.exists()) {
+                        userData = studentDoc.data();
+                    } else if (instituteDoc.exists()) {
+                        userData = instituteDoc.data();
+                    }
+
+                    // Resolve with user data including role
+                    resolve({
+                        uid: user.uid,
+                        email: user.email,
+                        role: userData ? userData.role : null
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    resolve({
+                        uid: user.uid,
+                        email: user.email,
+                        role: null
+                    });
+                }
+            } else {
+                resolve(null);
+            }
         });
     });
 };
@@ -83,12 +107,14 @@ const getUserState = (auth) => {
 app.use(async (req, res, next) => {
     try {
         const user = await getUserState(auth);
-        req.session.user = user ? { uid: user.uid, email: user.email } : null;
+        req.session.user = user ? user : null;
     } catch (error) {
         console.error('Error getting auth state:', error);
+        req.session.user = null;
     }
     next();
 });
+
 
 app.get('/', (req, res) => {
     const message = req.session.message || null;  // Get the message from the session
@@ -107,42 +133,109 @@ app.post('/login', async (req, res) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log("logged in as : ", user.email);
-        req.session.user = { uid: user.uid, email: user.email };
+        
+        // Fetch role from Firestore
+        let userDoc = await getDoc(doc(db, 'students', user.uid)) || await getDoc(doc(db, 'institutes', user.uid));
+        
+        if (!userDoc.exists()) {
+            throw new Error('User not found');
+        }
+
+        const userData = userDoc.data();
+        req.session.user = {
+            uid: user.uid,
+            email: user.email,
+            role: userData.role // Store role in session
+        };
+
+        console.log("Logged in as:", user.email, "Role:", userData.role);
         res.redirect('/');
     } catch (error) {
-        const errorMessage = error.message;
-        console.error('login error:', errorMessage);
-        res.render('login.ejs', { error: errorMessage , user: req.session.user });
+        console.error('Login error:', error.message);
+        res.render('login.ejs', { error: error.message, user: req.session.user });
     }
-})
+});
+
+app.get('/test', (req, res) => {
+    res.send(req.session.user); // Check what’s in the session
+});
+
+
+app.use((req, res, next) => {
+    console.log('Session user:', req.session.user); // Log session user info
+    next();
+});
 
 app.get('/signup',(req,res)=>{
   
     const error = req.query.error || null;
-    res.render('signup.ejs',{ user: req.session.user,error});
+    const role = req.query.role || '';
+    res.render('signup.ejs',{ user: req.session.user,error,role});
    
 })
 
 app.post('/signup', async (req, res) => {
-    const { email, password,confirmpassword } = req.body;
+    const { name, usn, sem, branch, email, password, confirmpassword, role } = req.body;
+
+    // Check if passwords match
     if (password !== confirmpassword) {
-        return res.render('signup.ejs', { error: 'Passwords do not match', user: req.session.user });
+        return res.render('signup.ejs', {
+            error: 'Passwords do not match',
+            user: req.session.user,
+            name,
+            email,
+            usn,
+            sem,
+            branch,
+            role
+        });
     }
+
     try {
+        // Create the user using Firebase Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log('User created:', user.email);
-        req.session.user = { uid: user.uid, email: user.email };
-        res.redirect('/');
-    }
-    catch(error){
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error('Signup error:', errorCode, errorMessage);
-        return res.render('signup.ejs',{error:errorMessage,user:req.session.user})
+
+        // Save user data to Firestore based on role
+        if (role === 'student') {
+            await setDoc(doc(db, "students", user.uid), {
+                name,
+                usn,
+                sem,
+                branch,
+                email,
+                role: 'student'
+            });
+        } else if (role === 'institute') {
+            await setDoc(doc(db, "institutes", user.uid), {
+                name,
+                email,
+                role: 'institute'
+            });
         }
-})
+
+        // Set session user data
+        req.session.user = { uid: user.uid, email: user.email, role };
+
+        // Redirect based on role
+        res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : '/dashboard');
+    } catch (error) {
+        console.error('Signup error:', error.message);
+
+        return res.render('signup.ejs', {
+            error: error.message,
+            user: req.session.user,
+            name,
+            email,
+            usn,
+            sem,
+            branch,
+            role
+        });
+    }
+});
+
+
 
 
 app.post('/logout', async (req, res) => {
@@ -181,24 +274,33 @@ app.post('/verify', async (req, res) => {
     }
 });
 
-const instauth = (req, res, next) => {
-    const instemail = process.env.instemail;
-    const user = req.session.user;
 
-    if (user && user.email === instemail) {
-        next();
+const isStudent = (req, res, next) => {
+    if (req.session.user && req.session.user.role === 'student') {
+        next(); // User is a student, proceed
     } else {
-        res.status(403).send('access restricted!(login as institute to proceed)');
+        res.status(403).send('Access denied.'); // Access denied for non-students
+    }
+};
+const isInstitute = (req, res, next) => {
+    
+    if (!req.session.user ) {
+        return res.redirect('/login');
+    }
+    if (req.session.user && req.session.user.role === 'institute') {
+        next(); 
+    } else {
+        res.status(403).send('Access denied.'); 
     }
 };
 
 
 
-app.get('/issuenew',instauth,(req,res)=>{
+app.get('/issuenew',isInstitute,(req,res)=>{
     res.render('crtfrm.ejs',{user:req.session.user})
 });
 
-app.post('/issuenew',instauth,async(req,res)=>{
+app.post('/issuenew',isInstitute,async(req,res)=>{
     const { name, USN, branch, sem,lvl,cours,dateofcmp } = req.body;
     const courseName = `${req.body.lvl} - ${req.body.cours}`;  
     const dateofcomp = dateofcmp;
@@ -217,21 +319,6 @@ app.post('/issuenew',instauth,async(req,res)=>{
         
         // Store IPFS hash on blockchain
         await storeHashOnBlockchain(certid, ipfsHash);
-//         firebase.auth().currentUser.getIdTokenResult()
-//   .then((idTokenResult) => {
-//     // Fetch the instemail from .env or configuration
-//     const instemail = process.env.instemail;
-//     if (idTokenResult.claims.instemail === instemail) {
-//       console.log('User has the required custom claim.');
-//       // Allow access or show UI based on the custom claim
-//     } else {
-//       console.log('User does not have the required custom claim.');
-//       // Handle lack of access or redirect
-//     }
-//   })
-//   .catch((error) => {
-//     console.error('Error fetching ID token result:', error);
-//   });
 
         await setDoc(doc(db, "certificates", certid), {
             certId: certid,
@@ -251,7 +338,7 @@ app.post('/issuenew',instauth,async(req,res)=>{
     }
 });
 
-app.post('/revoke/:certid',instauth, async (req, res) => {
+app.post('/revoke/:certid',isInstitute, async (req, res) => {
     
     const certid = req.params.certid;
     try {
@@ -270,11 +357,10 @@ app.post('/revoke/:certid',instauth, async (req, res) => {
 
 
 
-app.get('/dashboard',async (req,res)=>{
-    if (!req.session.user || req.session.user.email !== process.env.instemail) {
+app.get('/dashboard',isInstitute,async (req,res)=>{
+    if (!req.session.user ) {
         return res.redirect('/login');
     }
-    if(req.session.user.email == process.env.instemail){
         try {
             const querySnapshot = await getDocs(collection(db, "certificates"));
             const certificates = [];
@@ -295,6 +381,39 @@ app.get('/dashboard',async (req,res)=>{
         console.error('Error fetching certificates:', error);
         res.status(500).send('Error fetching certificates');
     }
+});
+
+app.get('/student/dashboard/:uid', isStudent, async (req, res) => {
+    const { uid } = req.params;  
+    if (req.session.user.uid !== uid) {
+        return res.status(403).send('Access denied. You can only view your own dashboard.');
+    }
+
+    try {
+        const studentDoc = await firebase.firestore().collection('students').doc(uid).get();
+        if (!studentDoc.exists) {
+            return res.status(404).send('Student not found.');
+        }
+
+        const studentData = studentDoc.data();
+
+        const certificatesSnapshot = await firebase.firestore().collection('certificates')
+            .where('usn', '==', studentData.usn).get();
+
+        const certificates = [];
+        certificatesSnapshot.forEach(doc => {
+            certificates.push(doc.data());
+        });
+
+        res.render('stddash.ejs', {
+            user: req.session.user,
+            student: studentData,
+            certificates
+        });
+
+    } catch (error) {
+        console.error('Error fetching student data:', error);
+        res.status(500).send('Internal server error');
     }
 });
 
