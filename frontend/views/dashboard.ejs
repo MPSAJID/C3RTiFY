@@ -35,7 +35,7 @@
                         <td><%= certificate.branch %></td>
                         <td><%= certificate.sem %></td>
                         <td><%= certificate.course %></td>
-                        <td><a href="https://gateway.pinata.cloud/ipfs/<%= certificate.ipfshash%>" target="_blank">View Certificate</a></td>
+                        <td><a href="../../backend/certs/cert-<%=certificate.name%>-<%=certificate.usn%>.pdf" target="_blank" >View Certificate</a></td>
                         <td>
                             <% if (certificate.isRevoked) { %>
                                 <span style="color: red;" class="badge bg-danger">Revoked</span>

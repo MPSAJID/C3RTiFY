@@ -8,6 +8,11 @@ const fbapp = firebase.initializeApp(firebaseConfig);
 
 const db = getFirestore(fbapp);
 
+const verifyget = (req, res) => {
+    const certId = req.query.certId || '';
+    res.render('verify.ejs', { user: req.session.user, certId : certId, result: null, error: null });
+};
+
 const verify = async (req, res) => {
     const { certId } = req.body;
     try {
@@ -20,6 +25,10 @@ const verify = async (req, res) => {
         console.error('Verification error:', error);
         res.render('verify.ejs', { user: req.session.user, certId,result: null, error: 'serverError verifying certificate' });
     }
+};
+
+const issuenewget = (req,res)=>{
+    res.render('crtfrm.ejs',{user:req.session.user})
 };
 
 const issuenew = async(req,res)=>{
@@ -77,4 +86,4 @@ const revoke = async (req, res) => {
     }
 };
 
-module.exports = {verify , issuenew, revoke};
+module.exports = {verify, verifyget, issuenewget, issuenew, revoke};

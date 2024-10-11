@@ -6,6 +6,11 @@ const {firebaseConfig } = require('../firebaseconfig');
 const fbapp = firebase.initializeApp(firebaseConfig);
 const auth = getAuth(fbapp);
 const db = getFirestore(fbapp);
+
+const loginget = (req, res) => {
+    res.render('login.ejs',{ user: req.session.user});
+};
+
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -27,19 +32,26 @@ const login = async (req, res) => {
                 email: user.email,
                 role: userData.role // Store role in session
             };
+            console.log("Logged in as:", user.email, "Role:", userData.role);
+            res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : '/dashboard');
         } else {
             throw new Error('User not found');
         }
         
 
-        console.log("Logged in as:", user.email, "Role:", userData.role);
-        res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : '/dashboard');
+       
     } catch (error) {
         console.error('Login error:', error.message);
         res.render('login.ejs', { error: error.message, user: req.session.user });
     }
 };
 
+const signupget = (req,res)=>{
+    const error = req.query.error || null;
+    const role = req.query.role || '';
+    res.render('signup.ejs',{ user: req.session.user,error,role});
+   
+};
 
 const signup =  async (req, res) => {
     const { name, usn, sem, branch, email, password, confirmpassword, role } = req.body;
@@ -119,4 +131,4 @@ const logout = async (req, res) => {
     }
 };
 
-module.exports = {signup, login, logout };
+module.exports = {signup, login, logout, loginget, signupget };

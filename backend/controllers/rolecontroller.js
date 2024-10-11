@@ -1,7 +1,7 @@
 const { getFirestore, doc, setDoc, collection, query, where, getDocs, getDoc } = require("firebase/firestore");
 
 
-const stddash = async (req, res) => {
+exports.stddash = async (req, res) => {
     const { uid } = req.params;  
     if (req.session.user.uid !== uid) {
         return res.status(403).send('Access denied. You can only view your own dashboard.');
@@ -35,7 +35,7 @@ const stddash = async (req, res) => {
     }
 };
 
-const instdash = async (req,res)=>{
+exports.instdash = async (req,res)=>{
     
     const { uid } = req.params;  
     if (req.session.user.uid !== uid) {
@@ -67,4 +67,3 @@ const instdash = async (req,res)=>{
     }
 };
 
-module.exports = {stddash, instdash };

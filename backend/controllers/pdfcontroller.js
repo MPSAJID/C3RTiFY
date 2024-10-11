@@ -2,103 +2,97 @@
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const fs = require('fs');
 
-async function generateCertificate(outputPath, USN, sem,branch, candidateName, courseName, dateofcomp, instituteLogoPath) {
-    // Create a new PDF document
+async function generateCertificate(outputPath, USN, sem, branch, candidateName, courseName, dateofcomp, instituteLogoPath) {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([841.89, 595.28]);
 
     const { width, height } = page.getSize();
-    console.log(width);
- 
-    
-    const timesRomanFont=await pdfDoc.embedFont(StandardFonts.TimesRoman);
-    const TimesRomanBold=await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-    const HelveticaBold=await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const borderWidth = 2; // Set border thickness
-        const borderColor = rgb(0, 0, 0); // Set border color
-        page.drawRectangle({
-            x: borderWidth / 2,
-            y: borderWidth / 2,
-            width: width - borderWidth,
-            height: height - borderWidth,
-            borderColor: borderColor,
-            borderWidth: borderWidth,
-        });
-    
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    const TimesRomanBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    const HelveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const borderWidth = 2;
+    const borderColor = rgb(0, 0, 0);
+    page.drawRectangle({
+        x: borderWidth / 2,
+        y: borderWidth / 2,
+        width: width - borderWidth,
+        height: height - borderWidth,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+    });
+
+    // Add institute title, center-aligned
     page.drawText('UNIVERSITY OF VISVESVARAYA COLLEGE OF ENGINEERING', {
-        x: 20,
+        x: (width / 2) - 300,
         y: height - 80,
         size: 28,
         font: HelveticaBold,
-        lineHeight: 33,
-        
     });
-    
+
     page.drawText('M A R V E L  R & D  L A B', {
-        x: 200,
-        y: height - 140,
+        x: (width / 2) - 140,
+        y: height - 120,
         size: 27,
         font: timesRomanFont,
-        color: rgb(0,0,0),
+        color: rgb(0, 0, 0),
     });
-    // Add institute logo
+
+    // Add logo if provided
     if (instituteLogoPath) {
         const logoBytes = fs.readFileSync(instituteLogoPath);
         const logoImage = await pdfDoc.embedPng(logoBytes);
         const logoDims = logoImage.scale(0.2);
         page.drawImage(logoImage, {
-            x:300,
-            y: height - 180,
-            size : 125,
+            x: (width / 2) - (logoDims.width / 2),
+            y: height - 200,
             width: logoDims.width,
             height: logoDims.height,
         });
     }
 
-    // Add title
+    // Add certificate title, center-aligned
     page.drawText('Certificate of Completion', {
-        x: 150,
-        y: height - 220,
+        x: (width / 2) - 150,
+        y: height - 250,
         size: 28,
         font: TimesRomanBold,
         color: rgb(0, 0, 0),
     });
-    
 
-    // Add recipient name, USN, and course name
+    // Add recipient details, left-aligned with proper spacing
     const recipientText = `
     \tHereby certifies that ${candidateName} with USN ${USN} from ${sem} sem 
     ${branch} has fulfilled all the prescribed requirements for the
     completion of the ${courseName} course as on ${dateofcomp}.
     `;
     page.drawText(recipientText.trim(), {
-        x: 50,
-        y: height - 280,
-        size: 28,
+        x: 60,
+        y: height - 320,
+        size: 18,
         font: timesRomanFont,
-        lineHeight: 30, // Adjust this value as needed for spacing
+        lineHeight: 24,
     });
 
-   
-    page.drawText('uvcega president',{
-        x:30,
-        y: height-500,
+    // Add signature placeholders
+    page.drawText('uvcega president', {
+        x: 60,
+        y: 100,
         size: 25,
     });
-    page.drawText('faculty advisor',{
-        x:4800,
-        y: height-500,
-        size: 25,
-    });
-   
 
-    // Save the PDF document
+    page.drawText('faculty advisor', {
+        x: width - 240,
+        y: 100,
+        size: 25,
+    });
+
     const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(outputPath, pdfBytes);
-
     console.log(`Certificate generated and saved at: ${outputPath}`);
-}
+};
+
 
 async function extractCertificate(pdfPath) {
     const pdfjsLib = await import('pdfjs-dist');
@@ -125,6 +119,6 @@ async function extractCertificate(pdfPath) {
 
 
 
-    // generateCertificate('certificate1.pdf', '12345','4thsem ','CSE', 'sajid', 'clcy-2','sept23', , 'G:/proj/C3RTiFY/public/marvel.png');
+    // generateCertificate('certificate1.pdf', '12345','4thsem ','CSE', 'sajid', 'clcy-2','sept23', , 'G:/proj/C3RTiFY//frontend/public/marvel.png');
     module.exports={generateCertificate}
    
