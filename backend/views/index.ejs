@@ -1,0 +1,169 @@
+<% layout('layout/boilerplate.ejs', { user: user }) %>
+
+<div class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Welcome to C3RTiFY</h1>
+    <p class="hero-description">Your trusted platform for certificate management and verification.</p>
+    <div class="hero-buttons">
+      <% if (user) { %>
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+        <form action="/logout" method="POST" class="logout-form">
+          <button type="submit" class="btn btn-secondary">Logout</button>
+        </form>
+      <% } else { %>
+        <a href="/signup" class="btn btn-primary">Sign Up</a>
+        <a href="/login" class="btn btn-secondary">Log In</a>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="features-section">
+  <h2 class="section-title">Features</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <i class="fas fa-shield-alt feature-icon"></i>
+      <h3>Secure Verification</h3>
+      <p>Verify your certificates with our secure and reliable system, ensuring authenticity and trust.</p>
+    </div>
+    <div class="feature-card">
+      <i class="fas fa-certificate feature-icon"></i>
+      <h3>Certificate Management</h3>
+      <p>Easily issue, manage, and track certificates with our user-friendly platform for institutions.</p>
+    </div>
+    <div class="feature-card">
+      <i class="fas fa-graduation-cap feature-icon"></i>
+      <h3>For Students</h3>
+      <p>Access your certificates anytime and share them with employers or institutions seamlessly.</p>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2 class="section-title">About Us</h2>
+  <p class="about-text">At C3RTiFY, we aim to revolutionize the way certificates are issued, managed, and verified. Our platform leverages secure technologies to ensure that every certificate is trustworthy and easily accessible.</p>
+</div>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  .hero-section {
+    background-color: #264653;
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    margin: 0 0 20px;
+  }
+
+  .hero-description {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+  }
+
+  .hero-buttons .btn {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #2a9d8f;
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: #e76f51;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #21867a;
+  }
+
+  .btn-secondary:hover {
+    background-color: #c4452e;
+  }
+
+  .features-section {
+    padding: 50px 20px;
+    background-color: #f0f4f8;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 2rem;
+    color: #264653;
+    margin-bottom: 40px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    color: #2a9d8f;
+    margin-bottom: 15px;
+  }
+
+  .about-section {
+    padding: 40px 20px;
+    background-color: #e9c46a;
+    text-align: center;
+  }
+
+  .about-text {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.2rem;
+    color: #264653;
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .hero-description {
+      font-size: 1rem;
+    }
+
+    .btn {
+      font-size: 0.9rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>

@@ -1,0 +1,135 @@
+<% layout('layout/boilerplate', { user: user, student, certificates }) %>
+
+<div class="container">
+    <h1 class="page-title">Welcome, <%= student.name %></h1>
+    
+    <!-- Student Information Section -->
+    <div class="student-info">
+        <h2>Your Profile</h2>
+        <div class="info-list">
+            <p><strong>Name:</strong> <%= student.name %></p>
+            <p><strong>USN:</strong> <%= student.usn %></p>
+            <p><strong>Semester:</strong> <%= student.sem %></p>
+            <p><strong>Branch:</strong> <%= student.branch %></p>
+            <p><strong>Email:</strong> <%= student.email %></p>
+        </div>
+    </div>
+
+    <!-- Certificates Section -->
+    <div class="certificates-section">
+        <h2>Your Certificates</h2>
+        <% if (certificates.length > 0) { %>
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Certificate ID</th>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>IPFS Hash</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% certificates.forEach(function(cert) { %>
+                        <tr>
+                            <td><%= cert.certId %></td>
+                            <td><%= cert.course %></td>
+                            <td><%= cert.sem %></td>
+                            <td><%= cert.ipfshash %></td>
+                            <td class="action-buttons">
+                                <a href="https://gateway.pinata.cloud/ipfs/<%= cert.ipfshash %>" target="_blank" class="btn btn-primary">View</a>
+                                <form action="/verify" method="post" style="display:inline;">
+                                    <input type="hidden" name="certId" value="<%= cert.certId %>">
+                                    <button type="submit" class="btn btn-secondary">Verify</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No certificates found.</p>
+        <% } %>
+    </div>
+</div>
+
+<style>
+    .container {
+        margin-top: 50px;
+        max-width: 900px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+        text-align: center;
+        color: #264653;
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+
+    .student-info h2, .certificates-section h2 {
+        color: #2a9d8f;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .info-list p {
+        font-size: 1.1rem;
+        margin: 8px 0;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th, .table td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #264653;
+        color: white;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .action-buttons .btn {
+        margin-right: 5px;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background-color: #2a9d8f;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary {
+        background-color: #264653;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        opacity: 0.9;
+    }
+</style>

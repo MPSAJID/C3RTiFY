@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C3RTiFY</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9; /* Light background color for contrast */
+        }
+
+        .main-content {
+            padding: 20px; /* Adds padding around the main content */
+            max-width: 1200px; /* Max width to center content */
+            margin: 0 auto; /* Center the content horizontally */
+        }
+
+        /* Optional: Styling for the navbar and footer, customize as needed */
+        nav {
+            background-color: #264653; /* Example navbar background */
+            padding: 15px;
+            color: white;
+        }
+
+        footer {
+            background-color: #264653; /* Example footer background */
+            padding: 15px;
+            color: white;
+            text-align: center;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 20px 0; /* Spacing for headings */
+        }
+    </style>
+</head>
+<body>
+    <%- include("../includes/navbar.ejs", { user: user }) %>
+    <div class="main-content">
+        <%- body -%>
+    </div>
+    <%- include("../includes/footer.ejs") %>
+</body>
+</html>

@@ -5,13 +5,9 @@ const crypto = require('crypto');
 const firebase = require("firebase/app");
 const {firebaseConfig } = require('../firebaseconfig');
 const fbapp = firebase.initializeApp(firebaseConfig);
+const path=require("path")
 
 const db = getFirestore(fbapp);
-
-const verifyget = (req, res) => {
-    const certId = req.query.certId || '';
-    res.render('verify.ejs', { user: req.session.user, certId : certId, result: null, error: null });
-};
 
 const verify = async (req, res) => {
     const { certId } = req.body;
@@ -25,10 +21,6 @@ const verify = async (req, res) => {
         console.error('Verification error:', error);
         res.render('verify.ejs', { user: req.session.user, certId,result: null, error: 'serverError verifying certificate' });
     }
-};
-
-const issuenewget = (req,res)=>{
-    res.render('crtfrm.ejs',{user:req.session.user})
 };
 
 const issuenew = async(req,res)=>{
@@ -61,7 +53,7 @@ const issuenew = async(req,res)=>{
             ipfshash: ipfsHash
         });
         req.session.message = 'Certificate issued and stored on blockchain successfully!';
-        res.redirect('/dashboard');
+        res.redirect(`/institute/dashboard/${req.session.user.uid}`);
 
     } catch (error) {
         console.error('Certificate generation error:', error);
@@ -70,20 +62,23 @@ const issuenew = async(req,res)=>{
 };
 
 const revoke = async (req, res) => {
-    
     const certid = req.params.certid;
     try {
-         await revokeCertificate(certid);
+        await revokeCertificate(certid);
         const certRef = doc(db, "certificates", certid);
         await setDoc(certRef, { isRevoked: true }, { merge: true });
-    
+        
+        console.log("---");
         req.session.message = 'Certificate revoked successfully';
-        res.redirect('/dashboard');
+        console.log("---");
+        return res.redirect(`/institute/dashboard/${req.session.user.uid}`);
+        console.log("---");
     } catch (error) {
         console.error('Error revoking certificate:', error);
         req.session.message = 'Error revoking certificate';
-        res.redirect('/dashboard');
+        return res.redirect(`/institute/dashboard/${req.session.user.uid}`);
     }
+    console.log("---");
 };
 
-module.exports = {verify, verifyget, issuenewget, issuenew, revoke};
+module.exports = {verify , issuenew, revoke};

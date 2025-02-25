@@ -1,0 +1,161 @@
+<% layout("layout/boilerplate", { user: user, error: error }) %>
+
+<div class="signup-container">
+    <form class="signup-box" action="/signup" method="post">
+        <h2 class="signup-title">Create Your Account</h2>
+
+        <!-- Error Message -->
+        <% if (error) { %>
+            <div class="alert alert-danger">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <!-- Role Selection -->
+        <div class="role-selection">
+            <label>Select Role</label>
+            <div class="role-options">
+                <input type="radio" id="student" name="role" value="student" onclick="showStudentFields()" required>
+                <label for="student">Student</label>
+
+                <input type="radio" id="institute" name="role" value="institute" onclick="hideStudentFields()" required>
+                <label for="institute">Institute</label>
+            </div>
+        </div>
+
+        <!-- Common Fields -->
+        <div class="input-container">
+            <label for="name">Full Name</label>
+            <input required type="text" id="name" name="name" placeholder="Full Name" class="input-field">
+
+            <label for="signup-email">Email</label>
+            <input required type="email" id="signup-email" name="email" placeholder="Email" class="input-field">
+        </div>
+
+        <!-- Student-Specific Fields -->
+        <div id="studentFields" class="input-container" style="display: none;">
+            <label for="usn">Student USN</label>
+            <input type="text" id="usn" name="usn" placeholder="Student USN" class="input-field">
+
+            <label for="sem">Current Semester</label>
+            <input type="text" id="sem" name="sem" placeholder="Current Semester" class="input-field">
+
+            <label for="branch">Student Branch</label>
+            <input type="text" id="branch" name="branch" placeholder="Student Branch" class="input-field">
+        </div>
+
+        <!-- Password Fields -->
+        <div class="input-container">
+            <label for="signup-password">Password</label>
+            <input required type="password" id="signup-password" name="password" placeholder="Password" class="input-field">
+
+            <label for="signup-confirm-password">Confirm Password</label>
+            <input required type="password" id="signup-confirm-password" name="confirmpassword" placeholder="Confirm Password" class="input-field">
+        </div>
+
+        <button type="submit" id="sgn-btn" class="btn-signup">Sign Up</button>
+    </form>
+</div>
+
+<script>
+    function showStudentFields() {
+        document.getElementById('studentFields').style.display = 'block'; // Show student fields
+    }
+
+    function hideStudentFields() {
+        document.getElementById('studentFields').style.display = 'none'; // Hide student fields
+    }
+</script>
+
+<style>
+    /* Overall container styling */
+    .signup-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        background-color: #f0f4f8;
+        padding: 20px;
+    }
+
+    /* Signup box styling */
+    .signup-box {
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .signup-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #264653;
+        text-align: center;
+    }
+
+    /* Role selection styling */
+    .role-selection {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .role-options {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
+    /* Input container styling */
+    .input-container {
+        margin-bottom: 20px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #2a9d8f;
+        box-shadow: 0 0 5px rgba(42, 157, 143, 0.3);
+    }
+
+    /* Button styling */
+    .btn-signup {
+        width: 100%;
+        background-color: #2a9d8f;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-signup:hover {
+        background-color: #21867a;
+    }
+
+    /* Error message styling */
+    .alert {
+        color: red;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    /* Labels styling */
+    label {
+        font-size: 1rem;
+        color: #264653;
+        display: block;
+        margin-top: 10px;
+    }
+</style>

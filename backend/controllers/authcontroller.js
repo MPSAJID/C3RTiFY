@@ -6,11 +6,6 @@ const {firebaseConfig } = require('../firebaseconfig');
 const fbapp = firebase.initializeApp(firebaseConfig);
 const auth = getAuth(fbapp);
 const db = getFirestore(fbapp);
-
-const loginget = (req, res) => {
-    res.render('login.ejs',{ user: req.session.user});
-};
-
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -25,33 +20,27 @@ const login = async (req, res) => {
         }
         
         // Check if the document exists in either collection
+        let userData;
         if (userDoc.exists()) {
-            const userData = userDoc.data();
+            userData = userDoc.data();
             req.session.user = {
                 uid: user.uid,
                 email: user.email,
                 role: userData.role // Store role in session
             };
-            console.log("Logged in as:", user.email, "Role:", userData.role);
-            res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : '/dashboard');
         } else {
             throw new Error('User not found');
         }
         
 
-       
+        console.log("Logged in as:", user.email, "Role:", userData.role);
+        res.redirect(userData.role === 'student' ? `/student/dashboard/${user.uid}` : `/institute/dashboard/${user.uid}`);
     } catch (error) {
         console.error('Login error:', error.message);
         res.render('login.ejs', { error: error.message, user: req.session.user });
     }
 };
 
-const signupget = (req,res)=>{
-    const error = req.query.error || null;
-    const role = req.query.role || '';
-    res.render('signup.ejs',{ user: req.session.user,error,role});
-   
-};
 
 const signup =  async (req, res) => {
     const { name, usn, sem, branch, email, password, confirmpassword, role } = req.body;
@@ -97,7 +86,7 @@ const signup =  async (req, res) => {
         req.session.user = { uid: user.uid, email: user.email, role };
 
         // Redirect based on role
-        res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : '/dashboard');
+        res.redirect(role === 'student' ? `/student/dashboard/${user.uid}` : `/institute/dashboard/${user.uid}`);
     } catch (error) {
         console.error('Signup error:', error.message);
 
@@ -131,4 +120,4 @@ const logout = async (req, res) => {
     }
 };
 
-module.exports = {signup, login, logout, loginget, signupget };
+module.exports = {signup, login, logout };

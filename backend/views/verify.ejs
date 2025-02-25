@@ -1,0 +1,100 @@
+<% layout('layout/boilerplate.ejs', { user: user, certId: certId, result: result, error: error }) %>
+
+<div class="container" id="verify-container">
+    <h1 class="page-title">Verify Certificate</h1>
+
+    <!-- Display Result or Error Messages -->
+    <% if (result) { %>
+        <div class="alert alert-success">
+            <strong>Success!</strong> <%= result %>
+        </div>
+    <% } else if (error) { %>
+        <div class="alert alert-danger">
+            <strong>Error!</strong> <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Verification Form -->
+    <form action="/verify" method="POST" class="verify-form">
+        <label for="certId">Enter Certificate ID:</label>
+        <input type="text" id="certId" name="certId" value="<%= certId %>" placeholder="Enter certificate ID" required>
+        <button type="submit" class="btn btn-primary">Verify</button>
+    </form> 
+</div>
+
+<script>
+    setTimeout(function() {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.style.display = 'none';
+        }
+    }, 5000);
+</script>
+
+<style>
+    #verify-container {
+        margin-top: 50px;
+        max-width: 600px;
+        background-color: #f8f9fa;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #264653;
+        margin-bottom: 30px;
+    }
+
+    .alert {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .verify-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .verify-form label {
+        font-size: 1.1rem;
+        color: #495057;
+    }
+
+    .verify-form input[type="text"] {
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .verify-form .btn-primary {
+        background-color: #2a9d8f;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .verify-form .btn-primary:hover {
+        background-color: #21867a;
+    }
+</style>

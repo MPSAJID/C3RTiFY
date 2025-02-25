@@ -1,0 +1,214 @@
+<% layout("layout/boilerplate.ejs", { user: user, certificates: certificates }) %>
+
+<div class="container-dash">
+  <h1 class="heading">Welcome to the Dashboard</h1>
+  <h2 class="sub-heading">Issued Certificates</h2>
+
+  <% if (user.email === process.env.instemail) { %>
+    <div class="alert-container">
+      <% if (message) { %>
+        <div class="alert alert-success">
+          <strong>Success!</strong> <%= message %>
+        </div>
+      <% } %>
+    </div>
+
+    <% if (certificates.length > 0) { %>
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>USN</th>
+            <th>Branch</th>
+            <th>Semester</th>
+            <th>Course</th>
+            <th>Certificate</th>
+            <th>Status</th>
+            <th>Action</th>
+            <th>Verification</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% certificates.forEach(certificate => { %>
+            <tr>
+              <td><%= certificate.name %></td>
+              <td><%= certificate.usn %></td>
+              <td><%= certificate.branch %></td>
+              <td><%= certificate.sem %></td>
+              <td><%= certificate.course %></td>
+              <td><a href="https://gateway.pinata.cloud/ipfs/<%= certificate.ipfshash %>" target="_blank" class="cert-link">View Certificate</a></td>
+              <td>
+                <% if (certificate.isRevoked) { %>
+                  <span class="badge badge-revoked">Revoked</span>
+                <% } else { %>
+                  <span class="badge badge-active">Active</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (!certificate.isRevoked) { %>
+                  <button class="btn btn-danger" onclick="confirmRevoke('<%= certificate.certId %>')">Revoke</button>
+                <% } else { %>
+                  <button class="btn btn-disabled" disabled>Revoked</button>
+                <% } %>
+              </td>
+              <td><a href="/verify?certId=<%= certificate.certId %>" class="verify-link">Verify</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p class="no-certificates">No certificates issued yet!</p>
+    <% } %>
+  <% } %>
+</div>
+
+<script>
+  // Hide alert messages after 5 seconds
+  setTimeout(function () {
+    const alert = document.querySelector('.alert');
+    if (alert) {
+      alert.style.display = 'none';
+    }
+  }, 5000);
+
+  // Confirm and handle certificate revocation
+  function confirmRevoke(certId) {
+    const confirmation = confirm("Are you sure you want to revoke this certificate?");
+    if (confirmation) {
+      fetch(`/revoke/${certId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        if (response.ok) {
+          window.location.href = '/dashboard';
+        } else {
+          alert('Failed to revoke certificate');
+        }
+      }).catch(err => {
+        console.error('Error:', err);
+      });
+    }
+  }
+</script>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container-dash {
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .heading, .sub-heading {
+    text-align: center;
+    color: #264653;
+  }
+
+  .alert-container {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  .alert {
+    padding: 1rem;
+    background-color: #2a9d8f;
+    color: #fff;
+    border-radius: 4px;
+  }
+
+  .cert-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  .cert-table th, .cert-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+
+  .cert-table th {
+    background-color: #264653;
+    color: #fff;
+  }
+
+  .cert-table tbody tr:nth-child(even) {
+    background-color: #f5f6fa;
+  }
+
+  .cert-link, .verify-link {
+    color: #2a9d8f;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  .badge-revoked {
+    background-color: #e76f51;
+    color: white;
+  }
+
+  .badge-active {
+    background-color: #2a9d8f;
+    color: white;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-danger {
+    background-color: #e76f51;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background-color: #c4452e;
+  }
+
+  .btn-disabled {
+    background-color: gray;
+    color: #fff;
+    cursor: not-allowed;
+  }
+
+  .no-certificates {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #777;
+  }
+
+  @media (max-width: 768px) {
+    .container-dash {
+      width: 95%;
+      padding: 1rem 0.5rem;
+    }
+
+    .cert-table th, .cert-table td {
+      padding: 10px 8px;
+    }
+  }
+</style>

@@ -1,0 +1,185 @@
+<% layout("layout/boilerplate", { user: user }) %>
+
+<div class="container" id="issue-certificate-container">
+    <form id="issueForm" action="/issuenew" method="post" class="box">
+        <h1>Issue New Certificate</h1>
+
+        <label for="name">Enter Recipient Name:</label>
+        <input name="name" type="text" placeholder="Full Name" id="name" required><br>
+
+        <label for="USN">Enter Recipient USN:</label>
+        <input name="USN" type="text" placeholder="USN" id="USN" required><br>
+
+        <label for="branch">Select Recipient Branch:</label>
+        <select name="branch" id="branch" required>
+            <option value="">Select Branch</option>
+            <% const branches = ["CSE", "ISE", "AIML", "ECE", "EEE", "MECH", "CIVIL", "ARCH"]; %>
+            <% branches.forEach(branch => { %>
+                <option value="<%= branch %>"><%= branch %></option>
+            <% }) %>
+        </select><br>
+
+        <label for="sem">Select Recipient Semester:</label>
+        <select name="sem" id="sem" required>
+            <option value="">Select Semester</option>
+            <% for (let i = 1; i <= 10; i++) { %>
+                <option value="<%= i %>"><%= i %></option>
+            <% } %>
+        </select><br>
+
+        <label for="lvl">Select Certificate Level:</label>
+        <select name="lvl" id="lvl" required>
+            <option value="level1">Level 1</option>
+            <option value="level2">Level 2</option>
+            <option value="level3">Level 3</option>
+        </select><br>
+
+        <label for="cours">Select Course:</label>
+        <select name="cours" id="cours" required>
+            <option value="CL-CY">CL-CY</option>
+            <option value="AI-ML">AI-ML</option>
+            <option value="IOT">IOT</option>
+            <option value="D&P">D&P</option>
+            <option value="EV-RE">EV-RE</option>
+            <option value="VFX">VFX</option>
+            <option value="AIR">AIR</option>
+        </select><br>
+
+        <label for="dateofcmp">Date of Completion:</label>
+        <input name="dateofcmp" type="date" id="dateofcmp" required><br>
+
+        <!-- Open Confirmation Modal -->
+        <button type="button" class="btn btn-primary" onclick="openConfirmationModal()">Issue Certificate</button>
+    </form>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Submission</h2>
+            <p>Certificates once issued cannot be edited!</p>
+            <button type="button" class="btn btn-success" onclick="submitForm()">Confirm</button>
+            <button type="button" class="btn btn-danger" onclick="closeConfirmationModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Script for handling the modal and form submission -->
+<script>
+    function openConfirmationModal() {
+        document.getElementById('confirmationModal').style.display = 'flex';
+    }
+
+    function closeConfirmationModal() {
+        document.getElementById('confirmationModal').style.display = 'none';
+    }
+
+    function submitForm() {
+        document.getElementById('issueForm').submit();
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('confirmationModal');
+        if (event.target === modal) {
+            closeConfirmationModal();
+        }
+    }
+</script>
+
+<style>
+    .container {
+        margin-top: 50px;
+        max-width: 700px;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #264653;
+        margin-bottom: 30px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+        color: #495057;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        margin-top: 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #2a9d8f;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #21867a;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .btn-success, .btn-danger {
+        padding: 10px 20px;
+        margin: 15px 10px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+</style>

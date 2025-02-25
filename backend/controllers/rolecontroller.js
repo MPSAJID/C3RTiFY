@@ -1,7 +1,8 @@
 const { getFirestore, doc, setDoc, collection, query, where, getDocs, getDoc } = require("firebase/firestore");
 
+const db=getFirestore();
 
-exports.stddash = async (req, res) => {
+const stddash = async (req, res) => {
     const { uid } = req.params;  
     if (req.session.user.uid !== uid) {
         return res.status(403).send('Access denied. You can only view your own dashboard.');
@@ -30,12 +31,13 @@ exports.stddash = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(error.stack)
         console.error('Error fetching student data:', error);
         res.status(500).send('Internal server error');
     }
 };
 
-exports.instdash = async (req,res)=>{
+const instdash = async (req,res)=>{
     
     const { uid } = req.params;  
     if (req.session.user.uid !== uid) {
@@ -67,3 +69,4 @@ exports.instdash = async (req,res)=>{
     }
 };
 
+module.exports = {stddash, instdash };
